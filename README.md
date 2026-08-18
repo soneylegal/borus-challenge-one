@@ -239,21 +239,20 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 ## ☁️ Evidência do Deploy na OCI (Oracle Cloud Infrastructure)
 
-Este projeto foi preparado para execução em instâncias de computação da **Oracle Cloud Infrastructure (OCI)** (ex: VM.Standard.E2.1.Micro ou instâncias Ampere A1 Always Free).
+Este projeto foi preparado para execução em instâncias de computação da **Oracle Cloud Infrastructure (OCI)**.
 
 ### Passos Realizados para o Deploy na OCI:
 1. **Provisionamento da Instância Compute na OCI**:
-   - Criação de uma instância Linux (Ubuntu 22.04 / 24.04 LTS ou Oracle Linux).
+   - Criação de uma instância Linux (Ubuntu 24.04 Minimal LTS).
    - Alocação de IP Público Reservado.
 2. **Configuração de Regras de Entrada (VCN Security List & Ingress Rules)**:
-   - Adicionada regra de Ingress no Security List da Virtual Cloud Network (VCN):
-     - **Source CIDR**: `0.0.0.0/0`
-     - **IP Protocol**: `TCP`
-     - **Destination Port Range**: `8000` (ou `80/443` com Nginx reverse proxy).
+   - Adicionadas regras de Ingress no Security List da Virtual Cloud Network (VCN):
+     - **Portas 80 e 443 (TCP)**: Abertas publicamente para o **Caddy** (HTTPS com certificado automático Let's Encrypt).
+     - **Porta 8000**: Mantida **isolada** na rede interna do Docker (`borus-network`), sem exposição pública direta.
 3. **Instalação do Docker e Inicialização**:
    ```bash
    sudo apt-get update && sudo apt-get install -y docker.io docker-compose-v2
-   git clone https://github.com/SEU_USUARIO/borus-challenge-one.git
+   git clone https://github.com/soneylegal/borus-challenge-one.git
    cd borus-challenge-one
    cp .env.example .env
    # Configurar GROQ_API_KEY no .env
@@ -264,7 +263,7 @@ Este projeto foi preparado para execução em instâncias de computação da **O
 ### Informações do Deploy na OCI:
 - **Link Público da Aplicação (HTTPS)**: [https://163.176.31.147.sslip.io](https://163.176.31.147.sslip.io)
 - **Documentação Swagger (OpenAPI)**: [https://163.176.31.147.sslip.io/docs](https://163.176.31.147.sslip.io/docs)
-- **Acesso Direto HTTP**: `http://163.176.31.147:8000`
+- **Proxy Reverso & Segurança**: Caddy 2 com TLS automático gerenciando o tráfego externo e roteando para `borus:8000` internamente.
 
 > [!TIP]
 > **Captura de Tela do Deploy na OCI**:
