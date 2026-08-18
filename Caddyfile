@@ -1,0 +1,3 @@
+163.176.31.147.sslip.io {
+    reverse_proxy borus:8000
+}

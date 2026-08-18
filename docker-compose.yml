@@ -1,0 +1,49 @@
+services:
+  rag-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: borus
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - GROQ_MODEL=${GROQ_MODEL:-openai/gpt-oss-120b}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-BAAI/bge-small-en-v1.5}
+      - CHROMA_PERSIST_DIRECTORY=/app/data/chroma
+      - DOCS_SOURCE_DIR=/app/docs_source
+      - APP_HOST=0.0.0.0
+      - APP_PORT=8000
+    volumes:
+      # Persistência da base vetorial do ChromaDB
+      - ./data/chroma:/app/data/chroma
+      # Montagem dos arquivos de documentação para ingestão
+      - ./docs_source:/app/docs_source:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: borus-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - rag-agent
+
+volumes:
+  caddy_data:
+  caddy_config:
