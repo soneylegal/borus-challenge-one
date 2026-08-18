@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Borus — Backend Docs Assistant</title>
+  <!-- Google Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Markdown parser (marked) and code highlighting (highlight.js) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/atom-one-dark.min.css">
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h2>Borus</h2>
+          <span class="badge">PDF Docs RAG</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Status da Base Vetorial</h3>
+        <div class="status-card" id="statusCard">
+          <div class="status-row">
+            <span class="status-dot healthy" id="statusDot"></span>
+            <span class="status-label" id="statusText">Verificando...</span>
+          </div>
+          <div class="metrics-grid">
+            <div class="metric">
+              <span class="metric-value" id="vectorCount">0</span>
+              <span class="metric-label">Vetores Indexados</span>
+            </div>
+            <div class="metric">
+              <span class="metric-value" id="modelName">GPT-OSS 120B</span>
+              <span class="metric-label">Groq Model</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Ações de Ingestão</h3>
+        <button class="btn btn-secondary w-full" id="btnIngest">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          Reindexar docs_source/ (.pdf)
+        </button>
+
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept=".pdf" style="display:none;">
+          <button class="btn btn-outline w-full" id="btnUploadTrigger">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+            </svg>
+            Upload de Arquivo PDF (.pdf)
+          </button>
+        </div>
+      </div>
+
+      <div class="sidebar-section prompt-suggestions">
+        <h3>Exemplos Rápidos</h3>
+        <button class="suggestion-chip" data-prompt="Quais são os padrões de autenticação JWT e API Gateway da arquitetura?">
+          🔑 Autenticação e API Gateway
+        </button>
+        <button class="suggestion-chip" data-prompt="Como funciona a estratégia de cache com Redis e invalidação?">
+          ⚡ Cache Redis e Invalidação
+        </button>
+        <button class="suggestion-chip" data-prompt="Quais são os padrões para paginação e tratamento de erros na API REST?">
+          📋 Padrões de API REST e Erros
+        </button>
+      </div>
+
+      <div class="sidebar-footer">
+        <a href="/docs" target="_blank" class="link-api-docs">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          FastAPI Swagger Docs
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="chat-container">
+      <header class="chat-header">
+        <div class="header-title">
+          <h1>Assistente RAG de Backend</h1>
+          <p>Consulte padrões de arquitetura, microsserviços, cache e diretrizes técnicas</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" id="btnClearChat" title="Limpar conversa">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+            </svg>
+            Limpar Chat
+          </button>
+        </div>
+      </header>
+
+      <div class="messages-container" id="messagesContainer">
+        <!-- Welcome Message -->
+        <div class="message-wrapper assistant">
+          <div class="avatar">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>
+            </svg>
+          </div>
+          <div class="message-content">
+            <div class="bubble">
+              <p>Olá! Sou o <strong>Borus</strong>, seu assistente de <strong>Documentação Técnica de Backend</strong>. Estou alimentado por <strong>ChromaDB</strong>, <strong>FastEmbed</strong> e <strong>Groq LLM</strong>.</p>
+              <p>Você pode me perguntar sobre:</p>
+              <ul>
+                <li>Arquitetura de microsserviços e mensageria</li>
+                <li>Convenções de APIs REST e códigos de erro</li>
+                <li>Estratégias de banco de dados, índices e caching</li>
+              </ul>
+              <p>Como posso ajudar hoje?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Footer -->
+      <footer class="chat-input-area">
+        <form class="input-form" id="chatForm">
+          <textarea
+            id="queryInput"
+            placeholder="Pergunte algo sobre a documentação técnica (Shift+Enter para quebra de linha)..."
+            rows="1"
+            required
+          ></textarea>
+          <button type="submit" class="btn btn-primary" id="btnSend">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+            <span>Enviar</span>
+          </button>
+        </form>
+      </footer>
+    </main>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
