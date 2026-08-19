@@ -12,23 +12,23 @@ O **Borus** é um agente inteligente de Geração Aumentada por Recuperação (R
 
 ---
 
-## 📑 Sumário
+## Sumário
 
-- [🏛️ Arquitetura da Solução](#️-arquitetura-da-solução)
-- [📂 Estrutura do Projeto](#-estrutura-do-projeto)
-- [🛠️ Tecnologias Utilizadas](#️-tecnologias-utilizadas)
-- [💡 Exemplos de Perguntas e Respostas](#-exemplos-de-perguntas-e-respostas-do-agente)
-- [⚙️ Configuração do Ambiente (`.env`)](#️-configuração-do-ambiente-env)
-- [🚀 Como Executar](#-como-executar)
+- [Arquitetura da Solução](#️-arquitetura-da-solução)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Tecnologias Utilizadas](#️-tecnologias-utilizadas)
+- [Exemplos de Perguntas e Respostas](#-exemplos-de-perguntas-e-respostas-do-agente)
+- [Configuração do Ambiente (`.env`)](#️-configuração-do-ambiente-env)
+- [Como Executar](#-como-executar)
   - [Opção 1: Docker Compose (Recomendado)](#opção-1-execução-com-docker-compose-recomendado)
   - [Opção 2: Python Virtualenv Local](#opção-2-execução-local-com-python-virtualenv)
   - [Ingestão e Upload de Novos PDFs](#-ingestão-e-upload-de-novos-pdfs)
-- [☁️ Evidência do Deploy na OCI (Oracle Cloud Infrastructure)](#️-evidência-do-deploy-na-oci-oracle-cloud-infrastructure)
+- [Evidência do Deploy na OCI](#️-evidência-do-deploy-na-oci-oracle-cloud-infrastructure)
   - [Passos Realizados para o Deploy](#passos-realizados-para-o-deploy-na-oci)
   - [Informações do Deploy e Acesso HTTPS](#informações-do-deploy-na-oci)
-  - [📸 Capturas de Tela da Aplicação no Ar](#-capturas-de-tela-da-aplicação-no-ar-na-oci)
-- [🧪 Testes Automatizados](#-testes-automatizados)
-- [📄 Licença](#-licença)
+  - [Capturas de Tela da Aplicação no Ar](#-capturas-de-tela-da-aplicação-no-ar-na-oci)
+- [Testes Automatizados](#-testes-automatizados)
+- [Licença](#-licença)
 
 ---
 
@@ -281,8 +281,8 @@ Este projeto foi preparado para execução em instâncias de computação da **O
    ```
 
 ### Informações do Deploy na OCI:
-- **Link Público da Aplicação (HTTPS)**: [https://163.176.31.147.sslip.io](https://163.176.31.147.sslip.io)
-- **Documentação Swagger (OpenAPI)**: [https://163.176.31.147.sslip.io/docs](https://163.176.31.147.sslip.io/docs)
+- **Link Público da Aplicação (HTTPS)**: [https://144.22.139.186.sslip.io](https://144.22.139.186.sslip.io)
+- **Documentação Swagger (OpenAPI)**: [https://144.22.139.186.sslip.io/docs](https://144.22.139.186.sslip.io/docs)
 - **Proxy Reverso & Segurança**: Caddy 2 com TLS automático gerenciando o tráfego externo e roteando para `borus:8000` internamente.
 
 ### 📸 Capturas de Tela da Aplicação no Ar na OCI:
