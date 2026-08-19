@@ -8,7 +8,7 @@
 [![pypdf](https://img.shields.io/badge/pypdf-PDF_Extraction-red.svg)](https://pypdf.readthedocs.io/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-O **Borus** é um agente inteligente de Recuperação Aumentada por Geração (RAG) desenvolvido para o **Challenge Alura Agente**. Ele é especializado em ler, processar e responder perguntas com precisão técnica a partir de **documentos em formato PDF**, citando explicitamente a página e o trecho de onde a informação foi extraída.
+O **Borus** é um agente inteligente de Geração Aumentada por Recuperação (RAG) desenvolvido para o **Challenge Alura Agente**. Ele é especializado em ler, processar e responder perguntas com precisão técnica a partir de **documentos em formato PDF**, citando explicitamente a página e o trecho de onde a informação foi extraída.
 
 ---
 
@@ -265,10 +265,16 @@ Este projeto foi preparado para execução em instâncias de computação da **O
 - **Documentação Swagger (OpenAPI)**: [https://163.176.31.147.sslip.io/docs](https://163.176.31.147.sslip.io/docs)
 - **Proxy Reverso & Segurança**: Caddy 2 com TLS automático gerenciando o tráfego externo e roteando para `borus:8000` internamente.
 
-> [!TIP]
-> **Captura de Tela do Deploy na OCI**:
-> ![Evidência do Deploy na OCI](docs/deploy_oci_screenshot.png)
-> *(Captura de tela da aplicação em execução no ambiente de nuvem da OCI)*
+### 📸 Capturas de Tela da Aplicação no Ar na OCI:
+
+#### 1. Interface Inicial com Conexão Segura HTTPS e 9 Vetores de PDF Indexados
+![Interface Inicial do Borus na OCI](docs/screenshots/borusOCI.png)
+
+#### 2. Resposta Estruturada com Tabela e Citação de Página do PDF ([Documento 1, p. 1])
+![Consulta de Arquitetura e Autenticação JWT](docs/screenshots/borusOCI2.png)
+
+#### 3. Detalhamento de Fontes Consultadas com Score de Similaridade e Resposta Concisa
+![Fontes Consultadas e Relevância](docs/screenshots/borusOCI3.png)
 
 ---
 
@@ -286,4 +292,4 @@ pytest -v
 
 Distribuído sob a licença **MIT**. Consulte o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-© 2026 Borus Contributors — Challenge Alura Agente.
+© 2026 Davi Laurindo
