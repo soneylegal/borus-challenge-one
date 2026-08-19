@@ -40,18 +40,27 @@ async def lifespan(app: FastAPI):
     )
     rag_pipeline = RAGPipeline(settings=settings)
 
-    # Auto-ingest docs if ChromaDB collection is empty and docs_source exists
+    # Auto-ingest docs if ChromaDB collection is empty or contains legacy .md files
     stats = rag_pipeline.get_stats()
-    if stats["total_vectors"] == 0:
+    stale_collection = False
+    if stats["total_vectors"] > 0:
+        sample = rag_pipeline.collection.peek(limit=1)
+        if sample and sample.get("metadatas") and sample["metadatas"]:
+            first_src = sample["metadatas"][0].get("source", "")
+            if first_src.endswith(".md"):
+                logger.info("Detectada base vetorial legada com arquivos .md. Resetando para documentos .pdf...")
+                stale_collection = True
+
+    if stats["total_vectors"] == 0 or stale_collection:
         docs_dir = Path(settings.DOCS_SOURCE_DIR)
         if docs_dir.exists():
-            logger.info(f"Empty collection detected. Auto-ingesting documents from {docs_dir}...")
+            logger.info(f"Ingerindo documentos PDF de {docs_dir}...")
             chunks = doc_loader.load_directory(docs_dir)
             if chunks:
-                rag_pipeline.index_chunks(chunks)
-                logger.info(f"Auto-ingested {len(chunks)} chunks on startup.")
+                rag_pipeline.index_chunks(chunks, reset=stale_collection)
+                logger.info(f"Ingestão de PDF concluída com {len(chunks)} chunks.")
     else:
-        logger.info(f"ChromaDB ready with {stats['total_vectors']} vector embeddings.")
+        logger.info(f"ChromaDB pronto com {stats['total_vectors']} vetores indexados.")
 
     yield
     logger.info("Shutting down Borus.")
@@ -185,13 +194,27 @@ async def ingest_documents():
             total_collection_count=rag_pipeline.collection.count(),
         )
 
-    result = rag_pipeline.index_chunks(chunks)
+    result = rag_pipeline.index_chunks(chunks, reset=True)
     return IngestResponse(
         status="success",
         message=f"Ingestão concluída com sucesso. {result['indexed_count']} chunks de páginas PDF foram processados.",
         indexed_chunks=result["indexed_count"],
         total_collection_count=result["total_collection_count"],
     )
+
+
+@app.post("/reset", tags=["Knowledge Ingestion"])
+async def reset_database():
+    """Reset and clear all vector embeddings from ChromaDB collection."""
+    if not rag_pipeline:
+        raise HTTPException(status_code=503, detail="Service not initialized.")
+
+    rag_pipeline.reset_collection()
+    return {
+        "status": "success",
+        "message": "Base vetorial limpa com sucesso. Todos os documentos foram desindexados.",
+        "total_vectors": 0,
+    }
 
 
 @app.post("/ingest/upload", response_model=IngestResponse, tags=["Knowledge Ingestion"])

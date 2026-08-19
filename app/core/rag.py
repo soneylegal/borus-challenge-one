@@ -81,8 +81,28 @@ class RAGPipeline:
         embeddings_generator = self.embedding_model.embed(texts)
         return [embedding.tolist() for embedding in embeddings_generator]
 
-    def index_chunks(self, chunks: list[DocumentChunk], batch_size: int = 64) -> dict[str, Any]:
-        """Generate embeddings and upsert chunks into ChromaDB collection in batches."""
+    def reset_collection(self) -> None:
+        """Clear all documents and vectors from the ChromaDB collection."""
+        logger.info(f"Purging and resetting ChromaDB collection '{self.settings.COLLECTION_NAME}'")
+        try:
+            self.chroma_client.delete_collection(self.settings.COLLECTION_NAME)
+        except Exception as e:
+            logger.warning(f"Collection deletion notice: {e}")
+        self.collection = self.chroma_client.get_or_create_collection(
+            name=self.settings.COLLECTION_NAME,
+            metadata={"hnsw:space": "cosine"},
+        )
+
+    def index_chunks(
+        self, chunks: list[DocumentChunk], reset: bool = False, batch_size: int = 64
+    ) -> dict[str, Any]:
+        """Generate embeddings and upsert chunks into ChromaDB collection in batches.
+
+        If reset=True, purges all previously indexed vectors before inserting new ones.
+        """
+        if reset:
+            self.reset_collection()
+
         if not chunks:
             return {"status": "empty", "indexed_count": 0, "total_collection_count": self.collection.count()}
 
@@ -214,10 +234,14 @@ class RAGPipeline:
                 "Verifique se sua `GROQ_API_KEY` está configurada corretamente no arquivo `.env`."
             )
 
-        # 5. Extract sources metadata
+        # 5. Extract sources metadata (only relevant chunks with similarity_score >= 0.65)
         sources = []
         seen_sources = set()
         for doc in retrieved_docs:
+            score = doc.get("similarity_score", 0.0)
+            if score < 0.65:
+                continue
+
             src_name = doc.get("source", "desconhecido")
             meta = doc.get("metadata", {})
             page = meta.get("page")
@@ -228,7 +252,7 @@ class RAGPipeline:
                     {
                         "source": src_name,
                         "page": page,
-                        "similarity_score": doc.get("similarity_score", 0.0),
+                        "similarity_score": score,
                         "snippet": doc.get("content", "")[:180] + "...",
                         "metadata": meta,
                     }
@@ -239,7 +263,7 @@ class RAGPipeline:
             "answer": answer_text,
             "model": self.settings.GROQ_MODEL,
             "sources": sources,
-            "chunks_retrieved": len(retrieved_docs),
+            "chunks_retrieved": len(sources),
         }
 
     def get_stats(self) -> dict[str, Any]:
